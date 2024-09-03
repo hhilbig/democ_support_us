@@ -4,3 +4,4 @@ output/.DS_Store
 data/.DS_Store
 .DS_Store
 data/clean_data_orig.csv
+figures/res_main.pdf

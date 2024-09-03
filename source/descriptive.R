@@ -243,7 +243,7 @@ vlist_names <- c(
 # Summary statistics
 
 sdf <- df[, vlist] %>%
-    map_dfr(haschaR::summarize_vec) %>%
+    map_dfr(summarize_vec) %>%
     mutate(variable = vlist_names) %>%
     dplyr::select(
         variable, mean_v,
@@ -301,7 +301,7 @@ df %>%
         x = NULL,
         y = "Change in beliefs about the size\nof the non-White population in 2040\n(percentage points)"
     ) +
-    haschaR::theme_hanno() +
+    theme_bw() +
     theme(legend.position = "bottom") +
     theme(legend.position = "none") +
     coord_flip()

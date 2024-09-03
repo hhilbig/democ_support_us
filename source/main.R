@@ -22,9 +22,9 @@ df <- read_csv("data/clean_data_upload.csv")
 # 2. Finished the survey
 # 3. Ideology smaller than 4
 
-df <- df %>% filter(attention_check == 8)
-df <- df %>% filter(finished == 1)
-df <- df %>% filter(ideology_left < 4)
+df <- df %>%
+  filter(attention_check == 8 & finished == 1 &
+    ideology_left < 4)
 
 # Scale indices
 df$post_democ_index <- scale(df$post_democ_index)
@@ -114,26 +114,24 @@ dict_o <- c(
 coef_base <- m %>%
   map_dfr(tidy_feols) %>%
   filter(term == "treat_share_high") %>%
-  mutate(what = "1 no controls")
+  mutate(what = "Base model\n(no controls)")
 
 coef_ctrl <- m_ctrl %>%
   map_dfr(tidy_feols) %>%
   filter(term == "treat_share_high") %>%
-  mutate(what = "2 pro-democracy index controls")
+  mutate(what = "Controls included")
 
 ## Combine, merge dictionaries
 
 coef_df <- bind_rows(coef_base, coef_ctrl) %>%
-  left_join(dict_o, by = "dv") %>%
-  filter(!what == "1 no controls")
+  left_join(dict_o, by = "dv")
 
 # set offset of lines in different models
-pd <- position_dodge(0.5)
+pd <- position_dodge(0.4)
 
 # Main results: belief updating, index, and behavioral
 
 p1_main <- coef_df %>%
-  filter(str_detect(what, "2")) %>%
   filter(dv %in% c("dem_estimate_post", "post_democ_index", "behavioral")) %>%
   mutate(outcome = fct_reorder(outcome, rev(order))) %>%
   ggplot() +
@@ -141,25 +139,27 @@ p1_main <- coef_df %>%
   geom_errorbar(
     aes(
       x = outcome, ymin = conf.low,
-      ymax = conf.high
+      ymax = conf.high,
+      color = what
     ),
     width = 0, position = pd
   ) +
   geom_point(
     aes(
-      x = outcome, y = estimate
+      x = outcome, y = estimate,
+      color = what,
+      fill = what
     ),
-    position = pd, size = 3
+    position = pd, size = 3, shape = 21
   ) +
   theme_bw() +
-  scale_shape_manual(values = c(21, 22, 23), name = "") +
   ylab("Standardized treatment effect") +
   xlab("") +
   theme(text = element_text(size = 24, family = "Times")) +
   theme(legend.position = "bottom") +
   theme(legend.title = element_blank()) +
-  scale_fill_brewer(type = "qual", name = "") +
-  scale_color_brewer(type = "qual", name = "") +
+  scale_fill_brewer(type = "qual", name = "", palette = "Set2") +
+  scale_color_brewer(type = "qual", name = "", palette = "Set2") +
   coord_flip()
 p1_main
 
@@ -288,8 +288,6 @@ etable(m_ctrl_interact,
   placement = "!h",
   fontsize = "scriptsize"
 )
-
-haschaR::move_plots_to_overleaf()
 
 # Specification that has the effect of the turnout treatment alone ------------------------------
 
