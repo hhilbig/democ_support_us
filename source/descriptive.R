@@ -283,7 +283,7 @@ df <- df %>%
         "Control: low estimate of the\nnon-White population in 2040"
     ))
 
-# Box plot to show the change in beliefs by treatment group
+# Show the change in beliefs by treatment group
 
 df %>%
     ggplot(aes(x = treat_share_high_label, y = diff_belief, fill = treat_share_high_label)) +
