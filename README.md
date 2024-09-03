@@ -1,0 +1,1 @@
+Data and code to replicated all figures and tables from "Is White American support for democracy declining as they approach minority status?" (A. Hager / H. Hilbig). Please contact hhilbig@ucdavis.edu in case there are questions.
