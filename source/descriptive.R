@@ -39,6 +39,10 @@ n_fail_check %>% cat("Respondents who failed the attention check: ", ., "\n")
 n_finished %>% cat("Respondents who finished the survey: ", ., "\n")
 n_left %>% cat("Respondents who are not too left-leaning: ", ., "\n")
 
+# Share of respondents who fail the attention check
+
+share_fail_check <- n_fail_check / n_finished
+share_fail_check %>% cat("Share of respondents who fail the attention check: ", ., "\n")
 # Variable dictionary
 
 dict_o <- c(
@@ -305,3 +309,23 @@ df %>%
     theme(legend.position = "bottom") +
     theme(legend.position = "none") +
     coord_flip()
+
+# Also just print these numbers (by treatment)
+
+df %>%
+    group_by(treat_share_high) %>%
+    summarise(mean_diff = mean(diff_belief, na.rm = TRUE)) %>%
+    mutate(treat = ifelse(treat_share_high == 1, "Treated", "Control")) %>%
+    mutate(ci_string = sprintf("%s: %.2f", treat, mean_diff)) %>%
+    pull(ci_string) %>%
+    paste(collapse = "\n")
+
+# Also show means for pre and post by treatment
+
+df %>%
+    group_by(treat_share_high) %>%
+    summarise(
+        mean_pre = mean(dem_estimate_pre, na.rm = TRUE),
+        mean_post = mean(dem_estimate_post, na.rm = TRUE)
+    ) %>%
+    mutate(treat = ifelse(treat_share_high == 1, "Treated", "Control"))

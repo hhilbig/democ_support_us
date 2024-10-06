@@ -145,6 +145,53 @@ m_non_white <- feols(
         "50-75%", " >75%"
     )))
 
+# Estimates w/ SEs ---------------------------------------------------------------
+
+# Function that returns the estimate for each subgroup and outcome with a 95% CI and N as a text string
+format_estimate_ci_n <- function(estimate, conf.low, conf.high, n) {
+    formatted_estimate <- sprintf("%.2f", estimate)
+    formatted_ci <- sprintf("CI: [%.2f, %.2f]", conf.low, conf.high)
+    formatted_n <- sprintf("N=%d", n)
+    paste(formatted_estimate, paste0("(", formatted_ci, ", ", formatted_n, ")"))
+}
+
+hte_vars <- c("ideology_left", "age_categ", "educ_college", "male", "income_categ", "non_white_categeorical")
+
+# Function to get subgroup estimates for each model
+get_subgroup_estimates <- function(model, hte_var) {
+    model %>%
+        mutate(
+            estimate_ci_n = format_estimate_ci_n(
+                estimate, conf.low, conf.high, n
+            ),
+            .groups = "drop"
+        ) %>%
+        select(dv, {{ hte_var }}, everything()) %>%
+        rename(subgroup = {{ hte_var }}) %>%
+        select(dv, subgroup, estimate_ci_n) %>%
+        arrange(dv, subgroup)
+}
+
+
+# Here, the models are tidy models (ie data frames)
+
+# Apply the function to each model
+educ_estimates <- get_subgroup_estimates(m_educ, "educ_college")
+gender_estimates <- get_subgroup_estimates(m_gender, "male")
+income_estimates <- get_subgroup_estimates(m_income, "income_categ")
+non_white_estimates <- get_subgroup_estimates(m_non_white, "non_white_categeorical")
+
+# Print all estimates
+# 1. Education
+print(educ_estimates)
+# 2. Gender
+print(gender_estimates)
+# 3. Income
+print(income_estimates)
+# 4. Non-white share (zip-code level)
+print(non_white_estimates)
+
+
 # Plot ---------------------------------------------------------------
 
 do_hte_plot <- function(hte_var, plot_label, data) {

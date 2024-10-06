@@ -209,7 +209,7 @@ cat("Estimates with 95% Confidence Intervals:\n\n", ci_text, "\n", sep = "")
 # Coefficients for the democracy index subcomponents --------------------------------
 
 p1_components <- coef_df %>%
-  filter(str_detect(what, "2")) %>%
+  filter(str_detect(what, "Controls included")) %>%
   filter(dv %in% c("democ1_squabble_post", "democ2_econ_bad_post", "democ3_no_order_post", "democ4_military_post", "democ5_better_post")) %>%
   mutate(outcome = fct_reorder(outcome, rev(order))) %>%
   ggplot() +
@@ -242,7 +242,7 @@ p1_components
 
 # Interactions ---------------------------------------------------------
 
-source("Code/analysis/fixest_dict.R")
+source("source/fixest_dict.R")
 
 olist_short <- c(
   "dem_estimate_post",
@@ -289,6 +289,20 @@ etable(m_ctrl_interact,
   fontsize = "scriptsize"
 )
 
+# Interaction coefficient as string
+
+interaction_coef <- m_ctrl_interact %>%
+  map_dfr(tidy_feols) %>%
+  filter(term == "treat_share_high:treat_turnout_high") %>%
+  mutate(outcome = olist_short) %>%
+  mutate(ci_string = sprintf("%s: %.2f [%.2f, %.2f]", outcome, estimate, conf.low, conf.high)) %>%
+  pull(ci_string) %>%
+  paste(collapse = "\n") %>%
+  str_split("\n") %>%
+  unlist()
+
+interaction_coef
+
 # Specification that has the effect of the turnout treatment alone ------------------------------
 
 # Specification for turnout treatment effect alone
@@ -313,3 +327,18 @@ etable(m_turnout_only,
   placement = "!h",
   fontsize = "scriptsize"
 )
+
+# Coef for turnout as a string w/ CIs
+# Print as XXX (95% CI: [XXX, XXX])
+
+coef_turnout <- m_turnout_only %>%
+  map_dfr(tidy_feols) %>%
+  filter(term == "treat_turnout_high") %>%
+  mutate(outcome = olist_short) %>%
+  mutate(ci_string = sprintf("%s: %.2f (95%% CI: [%.2f, %.2f])", outcome, estimate, conf.low, conf.high)) %>%
+  pull(ci_string) %>%
+  paste(collapse = "\n") %>%
+  str_split("\n") %>%
+  unlist()
+
+coef_turnout
